@@ -1,5 +1,5 @@
 # Quick Start Guide
-to get pre-trained model, go to https://drive.google.com/file/d/1STMPBxQ2d0Kujq2E450fsqFMsz3_X8gi/view?usp=sharing
+-to get pre-trained model, go to https://drive.google.com/file/d/1STMPBxQ2d0Kujq2E450fsqFMsz3_X8gi/view?usp=sharing
 -for extracted features in .npz files, go to https://drive.google.com/file/d/1_UM4LC2_cZ0Dl7EKbaH9wyrG1N1kx4Qg/view?usp=sharing
 ## Setup Instructions
 
