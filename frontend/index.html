@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Melody Transformer - AI Music Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .upload-options {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .upload-btn, .record-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .upload-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .upload-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .record-btn {
+            background: #48bb78;
+            color: white;
+        }
+
+        .record-btn:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .record-btn.recording {
+            background: #f56565;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .file-info.active {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .audio-preview {
+            background: #f8f9fb;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .audio-preview h3 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .audio-preview audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .graph-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .feedback-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .feedback-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .feedback-text {
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .regen-btn {
+            background: #edf2ff;
+            color: #374151;
+            padding: 12px 20px;
+            border: 1px solid #c7d2fe;
+            border-radius: 10px;
+            font-size: 0.95em;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        .regen-btn:hover:not(:disabled) {
+            background: #e0e7ff;
+        }
+
+        .regen-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .download-btn {
+            background: #48bb78;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        .download-btn:hover {
+            background: #38a169;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .upload-options {
+                flex-direction: column;
+            }
+
+            .upload-btn, .record-btn {
+                width: 100%;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Melody Transformer</h1>
+            <p>AI-Powered Music Analysis & Pitch Correction</p>
+        </div>
+
+        <div class="content">
+            <div class="upload-section">
+                <h2>Upload or Record Audio</h2>
+                <div class="upload-options">
+                    <input type="file" id="fileInput" accept="audio/*">
+                    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                        📁 Upload Audio
+                    </button>
+                    <button class="record-btn" id="recordBtn" onclick="toggleRecording()">
+                        🎤 Record Audio
+                    </button>
+                </div>
+                <div class="file-info" id="fileInfo"></div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px;">Processing audio... This may take a moment.</p>
+            </div>
+
+            <div class="error" id="error"></div>
+
+            <div class="results" id="results">
+                <div class="stats">
+                    <div class="stat-card">
+                        <h4>Accuracy</h4>
+                        <div class="value" id="accuracy">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Duration</h4>
+                        <div class="value" id="duration">-</div>
+                    </div>
+                </div>
+
+                <div class="audio-preview">
+                    <h3>Processed Audio Preview</h3>
+                    <audio id="previewAudio" controls></audio>
+                </div>
+
+                <div class="graph-container">
+                    <div id="graph"></div>
+                </div>
+
+                <div class="feedback-section">
+                    <h3>🤖 AI Feedback</h3>
+                    <div class="feedback-text" id="feedback"></div>
+                </div>
+
+                <button class="regen-btn" id="regenBtn" onclick="regenerate()" disabled>
+                    Regenerate (5 left)
+                </button>
+
+                <button class="download-btn" onclick="downloadProcessed()">
+                    ⬇️ Download Processed Audio (F0 Replaced)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configure API URL - change this if your backend runs on a different address
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:8000' 
+            : `${window.location.protocol}//${window.location.hostname}:8000`;
+        
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let currentAudioFile = null;
+        let maxGenerations = 5;
+        let currentGeneration = 0;
+
+        // File upload handler
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                currentAudioFile = file;
+                document.getElementById('fileInfo').textContent = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                document.getElementById('fileInfo').classList.add('active');
+                currentGeneration = 1;
+                updateRegenButton();
+                await processAudio(file, false);
+            }
+        });
+
+        // Recording functionality
+        async function toggleRecording() {
+            const btn = document.getElementById('recordBtn');
+            
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const file = new File([audioBlob], 'recording.wav', { type: 'audio/wav' });
+                        currentAudioFile = file;
+                        document.getElementById('fileInfo').textContent = 'Recording complete!';
+                        document.getElementById('fileInfo').classList.add('active');
+                        currentGeneration = 1;
+                        updateRegenButton();
+                        await processAudio(file, false);
+                    };
+
+                    mediaRecorder.start();
+                    btn.textContent = '⏹️ Stop Recording';
+                    btn.classList.add('recording');
+                } catch (err) {
+                    showError('Microphone access denied. Please allow microphone access.');
+                }
+            } else {
+                // Stop recording
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                btn.textContent = '🎤 Record Audio';
+                btn.classList.remove('recording');
+            }
+        }
+
+        // Process audio
+        async function processAudio(file, isRegeneration = false) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('error').classList.remove('active');
+
+            try {
+                console.log('Sending request to:', `${API_URL}/api/process`);
+                console.log('File size:', file.size, 'bytes');
+                
+                const response = await fetch(`${API_URL}/api/process`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log('Response status:', response.status);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    throw new Error(`Server error: ${response.status} - ${errorText}`);
+                }
+
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Processing failed');
+                }
+
+                // Display results
+                displayResults(data);
+                await loadPreviewAudio();
+            } catch (error) {
+                console.error('Fetch error:', error);
+                let errorMsg = error.message;
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    errorMsg = `Cannot connect to backend server at ${API_URL}. Make sure the backend server is running on port 8000.`;
+                }
+                showError(`Error: ${errorMsg}`);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        async function loadPreviewAudio() {
+            if (!currentAudioFile) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', currentAudioFile);
+
+            try {
+                const response = await fetch(`${API_URL}/api/replace_f0`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to generate preview audio');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const audio = document.getElementById('previewAudio');
+                audio.src = url;
+            } catch (err) {
+                console.error('Failed to load preview audio', err);
+            }
+        }
+
+        function updateRegenButton() {
+            const btn = document.getElementById('regenBtn');
+            if (!currentAudioFile) {
+                btn.disabled = true;
+                btn.textContent = 'Regenerate';
+                return;
+            }
+            const left = Math.max(maxGenerations - currentGeneration, 0);
+            if (left <= 0) {
+                btn.disabled = true;
+                btn.textContent = 'No regenerations left';
+            } else {
+                btn.disabled = false;
+                btn.textContent = `Regenerate (${left} left)`;
+            }
+        }
+
+        async function regenerate() {
+            if (!currentAudioFile) {
+                showError('No audio loaded to regenerate');
+                return;
+            }
+            if (currentGeneration >= maxGenerations) {
+                updateRegenButton();
+                return;
+            }
+            currentGeneration += 1;
+            updateRegenButton();
+            await processAudio(currentAudioFile, true);
+        }
+
+        // Display results
+        function displayResults(data) {
+            const graphData = data.graph_data;
+            
+            // Update stats
+            document.getElementById('accuracy').textContent = `${data.accuracy.toFixed(1)}%`;
+            const duration = graphData.frame_times[graphData.frame_times.length - 1];
+            document.getElementById('duration').textContent = `${duration.toFixed(1)}s`;
+
+            // Create graph
+            const trace1 = {
+                x: graphData.frame_times,
+                y: graphData.gt_int,
+                mode: 'markers',
+                name: 'Uploaded File',
+                marker: { color: 'blue', size: 6 },
+                text: graphData.gt_notes,
+                hovertemplate: 'Time: %{x:.2f}s<br>Note: %{text}<extra></extra>'
+            };
+
+            const trace2 = {
+                x: graphData.frame_times,
+                y: graphData.pred_int,
+                mode: 'markers',
+                name: 'Predicted Melody',
+                marker: { color: 'orange', size: 6 },
+                text: graphData.pred_notes,
+                hovertemplate: 'Time: %{x:.2f}s<br>Note: %{text}<extra></extra>'
+            };
+
+            const layout = {
+                title: 'Melody Comparison',
+                xaxis: { title: 'Time (s)' },
+                yaxis: {
+                    title: 'Note',
+                    tickmode: 'array',
+                    tickvals: Object.values(graphData.note_to_int),
+                    ticktext: graphData.note_labels
+                },
+                height: 500,
+                hovermode: 'closest',
+                legend: { x: 0.01, y: 0.99 }
+            };
+
+            Plotly.newPlot('graph', [trace1, trace2], layout, {responsive: true});
+
+            // Display feedback
+            document.getElementById('feedback').textContent = data.feedback || 'No feedback available.';
+
+            // Show results
+            document.getElementById('results').classList.add('active');
+        }
+
+        // Download processed audio
+        async function downloadProcessed() {
+            if (!currentAudioFile) {
+                showError('No audio file to process');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', currentAudioFile);
+
+            try {
+                const response = await fetch(`${API_URL}/api/replace_f0`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to process audio');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'processed_melody.wav';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (error) {
+                showError(`Error downloading: ${error.message}`);
+            }
+        }
+
+        // Show error
+        function showError(message) {
+            document.getElementById('error').textContent = message;
+            document.getElementById('error').classList.add('active');
+        }
+    </script>
+</body>
+</html>
