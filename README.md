@@ -21,7 +21,7 @@ copy .env.example .env
 cp .env.example .env
 ```
 
-Edit `.env` and set:
+Edit `.env` in `AdditionalTools` folder and set:
 - `CHECKPOINT_PATH`: Path to your `epoch_50.pt` file
 - `OPENAI_API_KEY`: Your OpenAI API key (optional, for ChatGPT feedback)
 
