@@ -1,5 +1,8 @@
 # Quick Start Guide
-
+## Important downloads
+- For trained model, go to https://drive.google.com/file/d/1STMPBxQ2d0Kujq2E450fsqFMsz3_X8gi/view?usp=drive_link
+- For extracted features, go to https://drive.google.com/file/d/1_UM4LC2_cZ0Dl7EKbaH9wyrG1N1kx4Qg/view?usp=drive_link
+  
 ## Setup Instructions
 
 ### 1. Install Dependencies
@@ -98,5 +101,6 @@ The frontend is fully responsive and works on mobile browsers:
 - Upload files from your device
 - Record using mobile microphone
 - View graphs and feedback on mobile screens
+
 
 
