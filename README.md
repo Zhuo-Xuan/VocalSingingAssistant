@@ -2,8 +2,42 @@
 ## Important downloads
 - For trained model, go to https://drive.google.com/file/d/1STMPBxQ2d0Kujq2E450fsqFMsz3_X8gi/view?usp=drive_link and download it before trying the app
 - For extracted features, go to https://drive.google.com/file/d/1_UM4LC2_cZ0Dl7EKbaH9wyrG1N1kx4Qg/view?usp=drive_link
+
+# 🚀 Getting Started with Melody Transformer (Mobile)
+This project allows you to extract and analyze melodies from audio or video files directly through a mobile app built with MIT App Inventor. The app communicates with a FastAPI backend to process files and return pitch accuracy and AI feedback.
+
+# 🛠️ Setup Instructions
+-Download Files: * Download the .aia file (App Inventor project).
+
+-Download the backend scripts (api.py, test_model.py, and your .pt model checkpoint).
+
+# Run the Backend:
+
+-Ensure your dependencies are installed (pip install fastapi uvicorn moviepy torch librosa).
+
+-Start the server on your PC:
+
+Bash
+python api.py
+Note: The server defaults to port 8000 or 8080. Check your terminal output to confirm.
+
+Configure the App:
+
+Import the .aia file into MIT App Inventor.
+
+Locate the WebViewer component (or the Web component used for API calls).
+
+CRITICAL: Change the URL/Base URL to match your computer's local IP address:
+
+Example: http://192.168.1.XX:8080
+
+Tip: Find your IP by typing ipconfig (Windows) or ifconfig (Mac/Linux) in your terminal.
+
+Connect: * Ensure your phone and PC are on the same Wi-Fi network.
+
+Build the APK or use the AI Companion to start testing!
   
-## Setup Instructions
+## Setup Instructions(website version)
 
 ### 1. Install Dependencies
 
